@@ -31,7 +31,7 @@ class GitVersionPlugin implements Plugin<Project> {
             doFirst {
                 File versionFile = new File(FILE_NAME)
                 String version = getGitVersion(project)
-                versionFile.write(version)
+                versionFile.write(version + "\n")
                 println(version)
             }
         }
