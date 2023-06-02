@@ -4,17 +4,29 @@ git_version () {
 	set +x
 	set -e
 
-	# Check for fixed version file
+	# Lookup fixed version file recursively up to the GIT root
 	local VERSION_FILE="git.version"
-	if [ -r $VERSION_FILE ]; then
-		# Read first line
-		local VERSION_LINE
-		read -r VERSION_LINE <${VERSION_FILE} || true
-		if [ "$VERSION_LINE" != "" ]; then
-			echo "$VERSION_LINE"
-			return 0
+	local VERSION_FOLDER=$PWD
+	while [[ $VERSION_FOLDER ]]; do
+		# Lookup for version file
+		if [ -r "${VERSION_FOLDER}/$VERSION_FILE" ]; then
+			# Read first line
+			local VERSION_LINE
+			read -r VERSION_LINE <"${VERSION_FOLDER}/${VERSION_FILE}" || true
+			if [ "$VERSION_LINE" != "" ]; then
+				echo "$VERSION_LINE"
+				return 0
+			fi
 		fi
-	fi
+
+		# Stop at the GIT root
+		if [ -d "${VERSION_FOLDER}/.git" ]; then
+			break
+		fi
+
+		# Go to parent folder
+		VERSION_FOLDER=${VERSION_FOLDER%/*}
+	done
 
 	# Compute information from GIT
 	local GIT_DESCRIBE; GIT_DESCRIBE=$(git describe --tags --abbrev=10 --dirty --always --long)
