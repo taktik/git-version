@@ -9,7 +9,7 @@ git_version () {
 	if [ -r $VERSION_FILE ]; then
 		# Read first line
 		local VERSION_LINE
-		read -r VERSION_LINE <${VERSION_FILE}
+		read -r VERSION_LINE <${VERSION_FILE} || true
 		if [ "$VERSION_LINE" != "" ]; then
 			echo "$VERSION_LINE"
 			return 0
