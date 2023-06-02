@@ -1,0 +1,47 @@
+plugins {
+	id 'groovy'
+	id 'com.gradle.plugin-publish' version '1.2.0'
+	id 'com.taktik.gradle.git-version' version '2.0.6'
+}
+
+group = 'com.taktik.gradle'
+version = gitVersion
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+
+repositories {
+	mavenLocal()
+	mavenCentral()
+}
+
+dependencies {
+	implementation(gradleApi())
+	implementation(localGroovy())
+	implementation('com.vdurmont:semver4j:3.1.0')
+}
+
+gradlePlugin {
+	plugins {
+		gitVersionPlugin {
+			id = 'com.taktik.gradle.git-version'
+			implementationClass = 'com.taktik.gradle.plugins.GitVersionPlugin'
+		}
+	}
+}
+
+java {
+	withSourcesJar()
+}
+
+publishing {
+	repositories {
+		maven {
+			credentials {
+				username repoUsername
+				password repoPassword
+			}
+			url = mavenReleasesRepository
+		}
+	}
+}

@@ -1,0 +1,1 @@
+../../../../shell/git-version.sh

@@ -1,0 +1,65 @@
+package com.taktik.gradle.plugins
+
+import com.vdurmont.semver4j.Semver
+import org.gradle.api.Plugin
+import org.gradle.api.Project
+
+class GitVersionPlugin implements Plugin<Project> {
+
+    public static final String WRITE_TASK_NAME = "writeGitVersion"
+    public static final String PRINT_TASK_NAME = "printGitVersion"
+    public static final String FILE_NAME = "git.version"
+
+    private final ClassLoader loader = getClass().classLoader
+
+    @Override
+    void apply(Project project) {
+        project.ext.gitVersion = getGitVersion(project)
+        if (project.hasProperty("jar")) {
+            project.jar {
+                doFirst {
+                    manifest {
+                        attributes(
+                                "Version": project.ext.gitVersion,
+                                "Implementation-Version": project.ext.gitVersion,
+                        )
+                    }
+                }
+            }
+        }
+        project.task(WRITE_TASK_NAME) {
+            doFirst {
+                File versionFile = new File(FILE_NAME)
+                String version = getGitVersion(project)
+                versionFile.write(version)
+                println(version)
+            }
+        }
+        project.task(PRINT_TASK_NAME) {
+            doFirst {
+                String version = getGitVersion(project)
+                println(version)
+            }
+        }
+    }
+
+    def getGitVersion(project) {
+        try {
+            // Execute shell script
+            def scriptContent = loader.getResource("git-version.sh").text
+            def stdout = new ByteArrayOutputStream()
+            project.exec {
+                commandLine 'bash', '-c', scriptContent + "\ngit_version"
+                standardOutput = stdout
+            }
+            def version = stdout.toString().trim()
+
+            // Check Semver validity
+            String semver = new Semver(version, Semver.SemverType.STRICT).toString()
+            return semver
+        } catch (Exception e) {
+            println("WARNING: Could not get git version: ${e.message}")
+            return '0.0.0-dev'
+        }
+    }
+}

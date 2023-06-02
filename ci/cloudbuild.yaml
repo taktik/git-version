@@ -10,6 +10,26 @@ steps:
     entrypoint: 'sh'
     args: [ '-c', 'echo ${_DOCKER_PASSWORD} | docker login --username=${_DOCKER_USERNAME} --password-stdin' ]
 
+  - name: 'docker:24'
+    entrypoint: 'sh'
+    args: [ '-c', 'echo $$REPO_PASSWORD | docker login docker.taktik.be --username=$$REPO_USERNAME --password-stdin' ]
+    secretEnv: ['REPO_USERNAME', 'REPO_PASSWORD']
+
   - name: 'docker:24-git'
     entrypoint: 'sh'
     args: [ '-c', 'docker build --push -t taktik/git-version:$(cat git.version) -f docker/Dockerfile . || true # https://github.com/moby/buildkit/issues/3919' ]
+
+  - name: 'eclipse-temurin:17-jdk-alpine'
+    entrypoint: 'sh'
+    dir: 'gradle'
+    args: [ '-c', 'apk add bash git && cp ../git.version ./ ; ./gradlew -PrepoUsername=$$REPO_USERNAME -PrepoPassword=$$REPO_PASSWORD publish' ]
+    secretEnv: [ 'REPO_USERNAME', 'REPO_PASSWORD' ]
+
+availableSecrets:
+  secretManager:
+    - versionName: projects/taktik-dev/secrets/ci-repo-username/versions/1
+      env: 'REPO_USERNAME'
+    - versionName: projects/taktik-dev/secrets/ci-repo-password/versions/1
+      env: 'REPO_PASSWORD'
+
+timeout: 300s

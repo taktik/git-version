@@ -1,0 +1,10 @@
+
+pluginManagement {
+    repositories {
+        maven { url = uri(mavenRepository) }
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
+rootProject.name = 'gradle-plugin-git-version'
