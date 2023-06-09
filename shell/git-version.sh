@@ -31,7 +31,8 @@ git_version () {
 	# Compute information from GIT
 	local GIT_DESCRIBE; GIT_DESCRIBE=$(git describe --tags --abbrev=10 --dirty --always --long)
 	local GIT_BRANCH; GIT_BRANCH=$(git symbolic-ref --short HEAD 2>/dev/null)
-	[[ $GIT_BRANCH == */* ]] && local GIT_BRANCH_PREFIX=${GIT_BRANCH%%/*} || local GIT_BRANCH_PREFIX=""
+ 	local GIT_BRANCH_PREFIX=""
+	[[ $GIT_BRANCH == */* ]] && GIT_BRANCH_PREFIX=${GIT_BRANCH%%/*}
 	local GIT_BRANCH_AFTER_PREFIX=${GIT_BRANCH#*/}
 	local GIT_TAG_MATCH; GIT_TAG_MATCH=$(git tag --list "${GIT_BRANCH_AFTER_PREFIX}" --list "${GIT_BRANCH_AFTER_PREFIX}.*")
 	local GIT_HASH=${GIT_DESCRIBE##*-g}
