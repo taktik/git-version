@@ -25,7 +25,9 @@ git_version () {
 		fi
 
 		# Go to parent folder
+		[ "$VERSION_FOLDER" = "/" ] && break
 		VERSION_FOLDER=${VERSION_FOLDER%/*}
+		[ "$VERSION_FOLDER" = "" ] && VERSION_FOLDER="/"
 	done
 
 	# Compute information from GIT
