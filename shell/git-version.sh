@@ -4,6 +4,17 @@ git_version () {
 	set +x
 	set -e
 
+	# Parse parameters
+	local OPTIND
+	local GIT_COMMIT
+	while getopts :c: flag
+	do
+    	case "${flag}" in
+    	    c) GIT_COMMIT=${OPTARG} ; shift ; shift ;;
+			*) ;;
+    	esac
+	done
+
 	# Lookup fixed version file recursively up to the GIT root
 	local VERSION_FILE="git.version"
 	local VERSION_FOLDER=$PWD
@@ -31,7 +42,9 @@ git_version () {
 	done
 
 	# Compute information from GIT
-	local GIT_DESCRIBE; GIT_DESCRIBE=$(git describe --tags --abbrev=10 --dirty --always --long)
+	local GIT_DESCRIBE;
+	[[ "$GIT_COMMIT" == "" ]] && GIT_DESCRIBE=$(git describe --tags --abbrev=10 --dirty --always --long)
+	[[ "$GIT_COMMIT" != "" ]] && GIT_DESCRIBE=$(git describe --tags --abbrev=10 --always --long "$GIT_COMMIT")
 	local GIT_BRANCH; GIT_BRANCH=$(git symbolic-ref --short HEAD 2>/dev/null)
  	local GIT_BRANCH_PREFIX=""
 	[[ $GIT_BRANCH == */* ]] && GIT_BRANCH_PREFIX=${GIT_BRANCH%%/*}
