@@ -12,12 +12,11 @@ steps:
 
   - name: 'docker:24'
     entrypoint: 'sh'
-    args: [ '-c', 'echo $$REPO_PASSWORD | docker login docker.taktik.be --username=$$REPO_USERNAME --password-stdin' ]
-    secretEnv: ['REPO_USERNAME', 'REPO_PASSWORD']
+    args: ['-c', 'docker buildx create --name multiarch --driver docker-container --use']
 
   - name: 'docker:24-git'
     entrypoint: 'sh'
-    args: [ '-c', 'docker build --push -t taktik/git-version:$(cat git.version) -f docker/Dockerfile . || true # https://github.com/moby/buildkit/issues/3919' ]
+    args: [ '-c', 'docker build --builder multiarch --progress=plain --push --platform linux/amd64,linux/arm64 --tag taktik/git-version:$(cat git.version) -f docker/Dockerfile .' ]
 
   - name: 'eclipse-temurin:17-jdk-alpine'
     entrypoint: 'sh'
