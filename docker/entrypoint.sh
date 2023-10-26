@@ -2,10 +2,11 @@
 
 ## Read parameters
 
-while getopts f: flag
+while getopts :f: flag
 do
     case "${flag}" in
-        f) GIT_VERSION_FILE=${OPTARG};;
+        f) GIT_VERSION_FILE=${OPTARG} ; shift ; shift ;;
+		*) ;;
     esac
 done
 
@@ -14,7 +15,7 @@ done
 source /git-version.sh
 
 if [ "$GIT_VERSION_FILE" != "" ]; then
-  git_version | tee $GIT_VERSION_FILE
+  git_version "$@" | tee "$GIT_VERSION_FILE"
 else
-  git_version
+  git_version "$@"
 fi
