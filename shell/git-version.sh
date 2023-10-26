@@ -17,37 +17,42 @@ git_version () {
     	esac
 	done
 
-	# Lookup fixed version file recursively up to the GIT root
-	local VERSION_FILE="git.version"
-	local VERSION_FOLDER=$PWD
-	while [[ $VERSION_FOLDER ]]; do
-		# Lookup for version file
-		if [ -r "${VERSION_FOLDER}/$VERSION_FILE" ]; then
-			# Read first line
-			local VERSION_LINE
-			read -r VERSION_LINE <"${VERSION_FOLDER}/${VERSION_FILE}" || true
-			if [ "$VERSION_LINE" != "" ]; then
-				echo "$VERSION_LINE"
-				return 0
-			fi
-		fi
-
-		# Stop at the GIT root
-		if [ -d "${VERSION_FOLDER}/.git" ]; then
-			break
-		fi
-
-		# Go to parent folder
-		[ "$VERSION_FOLDER" = "/" ] && break
-		VERSION_FOLDER=${VERSION_FOLDER%/*}
-		[ "$VERSION_FOLDER" = "" ] && VERSION_FOLDER="/"
-	done
-
-	# Compute information from GIT
+	# Process GIT_PATH
 	if [ "$GIT_COMMIT" == "" ] && [ "$GIT_PATH" != "" ]; then
 		# shellcheck disable=SC2086 # Intended splitting of GIT_PATH
 		GIT_COMMIT=$(git rev-list -1 HEAD -- $GIT_PATH)
 	fi
+
+	# Lookup fixed version file recursively up to the GIT root
+	local VERSION_FILE;
+	[[ "$GIT_COMMIT" == "" ]] && VERSION_FILE="git.version"
+	if [[ "$VERSION_FILE" != "" ]]; then
+		local VERSION_FOLDER=$PWD
+		while [[ $VERSION_FOLDER ]]; do
+			# Lookup for version file
+			if [ -r "${VERSION_FOLDER}/$VERSION_FILE" ]; then
+				# Read first line
+				local VERSION_LINE
+				read -r VERSION_LINE <"${VERSION_FOLDER}/${VERSION_FILE}" || true
+				if [ "$VERSION_LINE" != "" ]; then
+					echo "$VERSION_LINE"
+					return 0
+				fi
+			fi
+
+			# Stop at the GIT root
+			if [ -d "${VERSION_FOLDER}/.git" ]; then
+				break
+			fi
+
+			# Go to parent folder
+			[ "$VERSION_FOLDER" = "/" ] && break
+			VERSION_FOLDER=${VERSION_FOLDER%/*}
+			[ "$VERSION_FOLDER" = "" ] && VERSION_FOLDER="/"
+		done
+	fi
+
+	# Compute information from GIT
 	local GIT_DESCRIBE;
 	[[ "$GIT_COMMIT" == "" ]] && GIT_DESCRIBE=$(git describe --tags --abbrev=10 --dirty --always --long)
 	[[ "$GIT_COMMIT" != "" ]] && GIT_DESCRIBE=$(git describe --tags --abbrev=10 --always --long "$GIT_COMMIT")
