@@ -7,10 +7,12 @@ git_version () {
 	# Parse parameters
 	local OPTIND
 	local GIT_COMMIT
-	while getopts :c: flag
+	local GIT_PATH
+	while getopts :c:p: flag
 	do
     	case "${flag}" in
     	    c) GIT_COMMIT=${OPTARG} ; shift ; shift ;;
+    	    p) GIT_PATH=${OPTARG} ; shift ; shift ;;
 			*) ;;
     	esac
 	done
@@ -42,6 +44,10 @@ git_version () {
 	done
 
 	# Compute information from GIT
+	if [ "$GIT_COMMIT" == "" ] && [ "$GIT_PATH" != "" ]; then
+		# shellcheck disable=SC2086 # Intended splitting of GIT_PATH
+		GIT_COMMIT=$(git rev-list -1 HEAD -- $GIT_PATH)
+	fi
 	local GIT_DESCRIBE;
 	[[ "$GIT_COMMIT" == "" ]] && GIT_DESCRIBE=$(git describe --tags --abbrev=10 --dirty --always --long)
 	[[ "$GIT_COMMIT" != "" ]] && GIT_DESCRIBE=$(git describe --tags --abbrev=10 --always --long "$GIT_COMMIT")
