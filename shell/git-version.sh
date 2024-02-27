@@ -8,11 +8,13 @@ git_version () {
 	local OPTIND
 	local GIT_COMMIT
 	local GIT_PATH
-	while getopts :c:p: flag
+	local GIT_BRANCH
+	while getopts :c:p:b: flag
 	do
     	case "${flag}" in
     	    c) GIT_COMMIT=${OPTARG} ; shift ; shift ;;
     	    p) GIT_PATH=${OPTARG} ; shift ; shift ;;
+    	    b) GIT_BRANCH=${OPTARG} ; shift ; shift ;;
 			*) ;;
     	esac
 	done
@@ -56,7 +58,7 @@ git_version () {
 	local GIT_DESCRIBE;
 	[[ "$GIT_COMMIT" == "" ]] && GIT_DESCRIBE=$(git describe --tags --abbrev=10 --dirty --always --long)
 	[[ "$GIT_COMMIT" != "" ]] && GIT_DESCRIBE=$(git describe --tags --abbrev=10 --always --long "$GIT_COMMIT")
-	local GIT_BRANCH; GIT_BRANCH=$(git symbolic-ref --short HEAD 2>/dev/null)
+	[[ "$GIT_BRANCH" == "" ]] && GIT_BRANCH=$(git symbolic-ref --short HEAD 2>/dev/null)
  	local GIT_BRANCH_PREFIX=""
 	[[ $GIT_BRANCH == */* ]] && GIT_BRANCH_PREFIX=${GIT_BRANCH%%/*}
 	local GIT_BRANCH_AFTER_PREFIX=${GIT_BRANCH#*/}
