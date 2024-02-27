@@ -12,7 +12,7 @@ done
 
 ## Import and execute GIT version
 
-source /git-version.sh
+source /usr/local/lib/git-version.sh
 
 if [ "$GIT_VERSION_FILE" != "" ]; then
   git_version "$@" | tee "$GIT_VERSION_FILE"
