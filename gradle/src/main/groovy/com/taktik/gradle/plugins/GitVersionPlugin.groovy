@@ -27,6 +27,10 @@ class GitVersionPlugin implements Plugin<Project> {
                 }
             }
         }
+        // Write version in a file that will be read in dev mode where there is no jar
+        File buildVersionFile = new File("build/git.version")
+        buildVersionFile.write(project.ext.gitVersion + "\n")
+
         project.task(WRITE_TASK_NAME) {
             doFirst {
                 File versionFile = new File(FILE_NAME)
