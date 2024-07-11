@@ -1,7 +1,7 @@
 plugins {
 	id 'groovy'
 	id 'com.gradle.plugin-publish' version '1.2.0'
-	id 'com.taktik.gradle.git-version' version '2.0.7-g8385562b1b'
+	id 'com.taktik.gradle.git-version' version '2.0.15-ge2494e27eb'
 }
 
 group = 'com.taktik.gradle'

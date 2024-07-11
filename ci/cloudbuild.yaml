@@ -3,7 +3,7 @@ steps:
     entrypoint: 'bash'
     args: [ '-c', 'git fetch --unshallow --tags && git checkout ${BRANCH_NAME}' ]
 
-  - name: 'taktik/git-version:2.0.7-g8385562b1b'
+  - name: 'taktik/git-version:2.0.15-ge2494e27eb'
     args: [ '-f', 'git.version' ]
 
   - name: 'docker:24'
