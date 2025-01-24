@@ -1,8 +1,11 @@
 package com.taktik.gradle.plugins
 
-import com.vdurmont.semver4j.Semver
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.semver4j.Semver
+import org.gradle.process.ExecOperations
+
+import javax.inject.Inject
 
 class GitVersionPlugin implements Plugin<Project> {
 
@@ -48,19 +51,25 @@ class GitVersionPlugin implements Plugin<Project> {
         }
     }
 
+    interface InjectedExecOps {
+        @Inject
+        ExecOperations getExecOps()
+    }
+
     def getGitVersion(project) {
         try {
             // Execute shell script
             def scriptContent = loader.getResource("git-version.sh").text
             def stdout = new ByteArrayOutputStream()
-            project.exec {
+            def injected = project.objects.newInstance(InjectedExecOps)
+            injected.execOps.exec {
                 commandLine 'bash', '-c', scriptContent + "\ngit_version"
                 standardOutput = stdout
             }
             def version = stdout.toString().trim()
 
             // Check Semver validity
-            String semver = new Semver(version, Semver.SemverType.STRICT).toString()
+            String semver = new Semver(version).toString()
             return semver
         } catch (Exception e) {
             println("WARNING: Could not get git version: ${e.message}")

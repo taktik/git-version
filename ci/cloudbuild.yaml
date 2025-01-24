@@ -3,18 +3,18 @@ steps:
     entrypoint: 'bash'
     args: [ '-c', 'git fetch --unshallow --tags && git checkout ${BRANCH_NAME}' ]
 
-  - name: 'taktik/git-version:2.0.15-ge2494e27eb'
+  - name: 'taktik/git-version:2.0.17-gc1e6b8f42a'
     args: [ '-f', 'git.version' ]
 
   - name: 'docker:24'
     entrypoint: 'sh'
     args: [ '-c', 'echo ${_DOCKER_PASSWORD} | docker login --username=${_DOCKER_USERNAME} --password-stdin' ]
 
-  - name: 'docker:24'
+  - name: 'docker:27'
     entrypoint: 'sh'
     args: ['-c', 'docker buildx create --name multiarch --driver docker-container --use']
 
-  - name: 'docker:24-git'
+  - name: 'docker:27'
     entrypoint: 'sh'
     args: [ '-c', 'docker build --builder multiarch --progress=plain --push --platform linux/amd64,linux/arm64 --tag taktik/git-version:$(cat git.version) -f docker/Dockerfile .' ]
 
