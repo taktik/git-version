@@ -30,6 +30,18 @@ class GitVersionPlugin implements Plugin<Project> {
                 }
             }
         }
+        if (project.hasProperty("bootJar")) {
+            project.bootJar {
+                doFirst {
+                    manifest {
+                        attributes(
+                                "Version": project.ext.gitVersion,
+                                "Implementation-Version": project.ext.gitVersion,
+                        )
+                    }
+                }
+            }
+        }
         // Write version in a file that will be read in dev mode where there is no jar
         (new File("build")).mkdir()
         File buildVersionFile = new File("build/git.version")
@@ -72,7 +84,7 @@ class GitVersionPlugin implements Plugin<Project> {
             String semver = new Semver(version).toString()
             return semver
         } catch (Exception e) {
-            println("WARNING: Could not get git version: ${e.message}")
+            println("WARNING: Could not get git version: $e")
             return '0.0.0-dev'
         }
     }
