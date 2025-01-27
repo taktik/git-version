@@ -18,30 +18,6 @@ class GitVersionPlugin implements Plugin<Project> {
     @Override
     void apply(Project project) {
         project.ext.gitVersion = getGitVersion(project)
-        if (project.hasProperty("jar")) {
-            project.jar {
-                doFirst {
-                    manifest {
-                        attributes(
-                                "Version": project.ext.gitVersion,
-                                "Implementation-Version": project.ext.gitVersion,
-                        )
-                    }
-                }
-            }
-        }
-        if (project.hasProperty("bootJar")) {
-            project.bootJar {
-                doFirst {
-                    manifest {
-                        attributes(
-                                "Version": project.ext.gitVersion,
-                                "Implementation-Version": project.ext.gitVersion,
-                        )
-                    }
-                }
-            }
-        }
         // Write version in a file that will be read in dev mode where there is no jar
         (new File("build")).mkdir()
         File buildVersionFile = new File("build/git.version")
