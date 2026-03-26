@@ -54,6 +54,34 @@ git_version () {
 		done
 	fi
 
+	# Ensure sufficient git history for version computation in shallow clones
+	if [[ "$(git rev-parse --is-shallow-repository 2>/dev/null)" == "true" ]]; then
+		local DESCRIBE_REF="${GIT_COMMIT:-HEAD}"
+		local GIT_REMOTE
+		GIT_REMOTE=$(git remote 2>/dev/null | head -1) || true
+
+		if [[ -n "$GIT_REMOTE" ]]; then
+			# Fetch all tags from remote (lightweight: refs + tag objects only)
+			git fetch "$GIT_REMOTE" --tags 2>/dev/null || true
+
+			# Progressively deepen history until git describe can find a tag
+			if ! git describe --tags "$DESCRIBE_REF" >/dev/null 2>&1; then
+				local DEEPEN
+				for DEEPEN in 50 100 200 500 1000 2500 5000 10000; do
+					git fetch "$GIT_REMOTE" --deepen="$DEEPEN" 2>/dev/null || true
+					git describe --tags "$DESCRIBE_REF" >/dev/null 2>&1 && break
+				done
+			fi
+
+			# Last resort: full unshallow, preferring blobless fetch to skip file content
+			if ! git describe --tags "$DESCRIBE_REF" >/dev/null 2>&1; then
+				git fetch "$GIT_REMOTE" --unshallow --filter=blob:none 2>/dev/null \
+					|| git fetch "$GIT_REMOTE" --unshallow 2>/dev/null \
+					|| true
+			fi
+		fi
+	fi
+
 	# Compute information from GIT
 	local GIT_DESCRIBE;
 	[[ "$GIT_COMMIT" == "" ]] && GIT_DESCRIBE=$(git describe --tags --abbrev=10 --dirty --always --long)
