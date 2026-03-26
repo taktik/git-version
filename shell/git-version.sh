@@ -63,10 +63,22 @@ git_version () {
 	[[ $GIT_BRANCH == */* ]] && GIT_BRANCH_PREFIX=${GIT_BRANCH%%/*}
 	local GIT_BRANCH_AFTER_PREFIX=${GIT_BRANCH#*/}
 	local GIT_TAG_MATCH; GIT_TAG_MATCH=$(git tag --list "${GIT_BRANCH_AFTER_PREFIX}" --list "${GIT_BRANCH_AFTER_PREFIX}.*")
-	local GIT_HASH=${GIT_DESCRIBE##*-g}
-	local GIT_DESCRIBE_BEFORE_HASH=${GIT_DESCRIBE%-g*}
-	local GIT_DISTANCE=${GIT_DESCRIBE_BEFORE_HASH##*-}
-	local GIT_TAG=${GIT_DESCRIBE_BEFORE_HASH%-*}
+	local GIT_HASH
+	local GIT_DESCRIBE_BEFORE_HASH
+	local GIT_DISTANCE
+	local GIT_TAG
+	if [[ "$GIT_DESCRIBE" == *-g* ]]; then
+		GIT_HASH=${GIT_DESCRIBE##*-g}
+		GIT_DESCRIBE_BEFORE_HASH=${GIT_DESCRIBE%-g*}
+		GIT_DISTANCE=${GIT_DESCRIBE_BEFORE_HASH##*-}
+		GIT_TAG=${GIT_DESCRIBE_BEFORE_HASH%-*}
+	else
+		# Tagless repository: git describe --always returns just a hash
+		GIT_HASH=${GIT_DESCRIBE}
+		GIT_DESCRIBE_BEFORE_HASH=""
+		GIT_DISTANCE=0
+		GIT_TAG=""
+	fi
 
 	# Prepare defaults
 	local VERSION_MAJOR=0
